@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>SAPFPI - Gestión Académica</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+ 
+</head>
+<body>
+<div class="app-container">
+  <div class="header">
+    <h1><i class="fas fa-chalkboard-user"></i> SAPFPI · Gestión Integral</h1>
+    <p>Instructores | Competencias | Asignaciones | Fichas Tituladas (basado en modelo DDL)</p>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" data-tab="instructores"><i class="fas fa-users"></i> Instructores</button>
+    <button class="tab-btn" data-tab="competencias"><i class="fas fa-medal"></i> Competencias</button>
+    <button class="tab-btn" data-tab="asignaciones"><i class="fas fa-link"></i> Asignaciones (Instr. × Compet.)</button>
+    <button class="tab-btn" data-tab="fichas"><i class="fas fa-folder-open"></i> Fichas Tituladas</button>
+  </div>
+
+  <!-- SECCIÓN INSTRUCTORES -->
+  <div id="instructores" class="tab-content active">
+    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+      <h2><i class="fas fa-chalkboard-user"></i> Instructores</h2>
+      <button class="btn-primary" id="btnAddInstructor"><i class="fas fa-plus"></i> Nuevo Instructor</button>
+    </div>
+    <div class="table-wrapper">
+      <table id="instructoresTable">
+        <thead>
+          <tr><th>ID</th><th>Nombre completo</th><th>Teléfono</th><th>Correo</th><th>Cargo</th><th>Planta</th><th>Líder ficha</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="instructoresTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECCIÓN COMPETENCIAS -->
+  <div id="competencias" class="tab-content">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+      <h2><i class="fas fa-medal"></i> Competencias</h2>
+      <button class="btn-primary" id="btnAddCompetencia"><i class="fas fa-plus"></i> Nueva Competencia</button>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>ID Competencia</th><th>Nombre</th><th>Tipo</th><th>Duración (horas)</th><th>Acciones</th></tr></thead>
+        <tbody id="competenciasTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECCIÓN ASIGNACIONES Instr × Competencias -->
+  <div id="asignaciones" class="tab-content">
+    <div style="margin-bottom: 1.5rem; background: white; padding: 1.2rem; border-radius: 1rem;">
+      <h3><i class="fas fa-handshake"></i> Asignar instructor a competencia</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+        <div class="form-group" style="flex:1">
+          <label>Instructor</label>
+          <select id="asignInstrucSelect" class="form-control"></select>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>Competencia</label>
+          <select id="asignCompetSelect" class="form-control"></select>
+        </div>
+        <div><button class="btn-primary" id="btnAsignar"><i class="fas fa-save"></i> Asignar</button></div>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Instructor</th><th>Competencia</th><th>Acciones</th></tr></thead>
+        <tbody id="asignacionesTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECCIÓN FICHAS TITULADAS -->
+  <div id="fichas" class="tab-content">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+      <h2><i class="fas fa-folder-open"></i> Fichas de formación titulada</h2>
+      <button class="btn-primary" id="btnAddFicha"><i class="fas fa-plus"></i> Nueva Ficha</button>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th># Ficha</th><th>Programa</th><th>Jornada</th><th>Instructor Líder</th><th>Ambiente</th><th>Fecha Inicio</th><th>Fecha Fin</th><th>Acciones</th></tr></thead>
+        <tbody id="fichasTbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <footer>Basado en modelo SAPFPI · Gestión dinámica con DOM y datos mock persistentes (LocalStorage)</footer>
+</div>
+
+<script src="js/js.js"></script>
+</body>
+</html>

@@ -140,6 +140,79 @@ function escapeHTML(str) {
   });
 }
 
+// -------------------- VALIDACIONES --------------------
+// Importante: validar mejora la calidad del dato, pero NO reemplaza a escapeHTML().
+// La defensa contra XSS es escapar al pintar; la validación es la primera barrera, no la única.
+// Los límites numéricos coinciden con el DDL (tab_instructores / tab_competencias).
+
+/**
+ * Valida texto general (nombres de competencias, notas, etc.).
+ * Permite letras (con acentos, ü y ñ), números, espacios y puntuación básica.
+ * @param {string} text
+ * @returns {boolean}
+ */
+function isValidText(text) {
+  const regex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ0-9\s.,\-_()\/:]+$/;
+  return regex.test(text);
+}
+
+/**
+ * Valida nombres y apellidos de personas: solo letras, espacios, apóstrofo, punto y guion
+ * (admite "Güiza", "O'Brien", "María-José"). No admite números.
+ * @param {string} text
+ * @returns {boolean}
+ */
+function isValidName(text) {
+  const regex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'.\-]+$/;
+  return regex.test(text);
+}
+
+/**
+ * Valida los datos de un instructor antes de guardarlos.
+ * @returns {{ok: boolean, error?: string}}
+ */
+function validateInstructorInput(id, nom, ape, tel, correo) {
+  // id_instruc es DECIMAL(11,0): entero positivo de máximo 11 dígitos
+  if (!Number.isInteger(id) || id <= 0 || id > 99999999999) {
+    return { ok: false, error: 'El ID debe ser un entero positivo de máximo 11 dígitos.' };
+  }
+  if (!nom || !ape || !correo) {
+    return { ok: false, error: 'Complete los campos obligatorios (nombres, apellidos, correo).' };
+  }
+  if (!isValidName(nom) || nom.length > 60) {
+    return { ok: false, error: 'Los nombres contienen caracteres no permitidos (solo letras, máx. 60).' };
+  }
+  if (!isValidName(ape) || ape.length > 60) {
+    return { ok: false, error: 'Los apellidos contienen caracteres no permitidos (solo letras, máx. 60).' };
+  }
+  // tele_instruc es DECIMAL(10,0): máximo 10 dígitos
+  if (!/^\d{7,10}$/.test(tel)) {
+    return { ok: false, error: 'El teléfono debe contener únicamente números (entre 7 y 10 dígitos).' };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    return { ok: false, error: 'Correo electrónico no válido.' };
+  }
+  return { ok: true };
+}
+
+/**
+ * Valida los datos de una competencia antes de guardarlos.
+ * @returns {{ok: boolean, error?: string}}
+ */
+function validateCompetenciaInput(id, nom, dur) {
+  if (!Number.isInteger(id) || id <= 0 || id > 99999999999) {
+    return { ok: false, error: 'El ID debe ser un entero positivo de máximo 11 dígitos.' };
+  }
+  if (!nom || !isValidText(nom) || nom.length > 100) {
+    return { ok: false, error: 'El nombre de la competencia contiene caracteres no permitidos (máx. 100).' };
+  }
+  // val_duracion_competen es DECIMAL(3,0): entre 1 y 999 horas
+  if (!Number.isInteger(dur) || dur < 1 || dur > 999) {
+    return { ok: false, error: 'La duración debe ser un número entero entre 1 y 999 horas.' };
+  }
+  return { ok: true };
+}
+
 // -------------------- RENDER PRINCIPAL --------------------
 function renderAll() {
   renderInstructores();
@@ -278,11 +351,9 @@ function abrirModalInstructor(instructor = null) {
     const planta = modalDiv.querySelector('#modalPlanta').checked;
     const liderFicha = modalDiv.querySelector('#modalLider').checked;
 
-    // Validaciones
-    if (!nom || !ape || !correo || !id) { alert("Complete campos obligatorios (ID, nombres, apellidos, correo)."); return; }
-    if (!/^\d+$/.test(tel)) { alert("Teléfono debe contener solo números."); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { alert("Correo electrónico no válido."); return; }
-    if (id <= 0) { alert("ID debe ser un número positivo."); return; }
+    // Validaciones (formato y rangos); la unicidad del ID se revisa aparte
+    const validacion = validateInstructorInput(id, nom, ape, tel, correo);
+    if (!validacion.ok) { alert(validacion.error); return; }
     if (!isEdit && instructores.some(i => i.id_instruc === id)) { alert("ID instructor ya existe."); return; }
 
     // Al editar se parte del instructor existente para no perder campos que el formulario no muestra
@@ -400,9 +471,10 @@ function abrirModalCompetencia(comp = null) {
     const tipo = modal.querySelector('#compTipo').value;
     const dur = parseInt(modal.querySelector('#compDur').value);
 
-    // Validaciones de datos
-    if (!nom || isNaN(id) || isNaN(dur) || id <= 0 || dur <= 0) {
-      alert("Datos inválidos (ID y duración deben ser números positivos).");
+    // Validaciones de datos (formato y rangos)
+    const validacion = validateCompetenciaInput(id, nom, dur);
+    if (!validacion.ok) {
+      alert(validacion.error);
       return;
     }
     if (!isEdit && competencias.some(c => c.id_competen === id)) {
